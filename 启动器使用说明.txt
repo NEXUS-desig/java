@@ -5,3 +5,4 @@ Python脚本是Linux/Windows/ MacOS 通用
 建议是下载python环境
 有些时候打开这个启动器的时候不会自动下载
 下载链接:https://www.python.org/ftp/python/3.14.3/python-3.14.3-amd64.exe
+请直接左键双击运行
