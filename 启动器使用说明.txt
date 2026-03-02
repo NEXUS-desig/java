@@ -6,3 +6,5 @@ Python脚本是Linux/Windows/ MacOS 通用
 有些时候打开这个启动器的时候不会自动下载
 下载链接:https://www.python.org/ftp/python/3.14.3/python-3.14.3-amd64.exe
 请直接左键双击运行
+如果你要退出游戏，点击游戏上方的X，或者是点退出游戏，启动器不会回到原始界面，需要您多按几次回车
+具体更新日志，请看帮助(12)

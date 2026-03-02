@@ -1198,7 +1198,7 @@ class MinecraftLauncher:
         cmd = [self.config.java_path] + jvm_args + ["-cp", (";" if platform.system() == "Windows" else ":").join(classpath)] + [main_class] + mc_args
         return cmd
 
-    # -------------------- 启动游戏 --------------------
+    # ==================== 启动游戏（独立进程版本）====================
     def launch_minecraft(self, version_id: str, modpack: Optional[Modpack] = None) -> bool:
         global _shutdown_requested
         if _shutdown_requested:
@@ -1233,16 +1233,31 @@ class MinecraftLauncher:
 
             logger.debug("启动命令: " + " ".join(cmd))
             
-            if self.config.show_console:
-                subprocess.Popen(cmd, cwd=self.config.minecraft_data_path)
+            # 使用独立进程启动游戏，确保关闭启动器后游戏继续运行
+            if platform.system() == "Windows":
+                # Windows: 使用 DETACHED_PROCESS 标志创建独立进程
+                DETACHED_PROCESS = 0x00000008
+                subprocess.Popen(
+                    cmd, 
+                    cwd=self.config.minecraft_data_path,
+                    creationflags=DETACHED_PROCESS,
+                    stdout=subprocess.DEVNULL,
+                    stderr=subprocess.DEVNULL,
+                    stdin=subprocess.DEVNULL
+                )
             else:
-                startupinfo = None
-                if platform.system() == "Windows":
-                    startupinfo = subprocess.STARTUPINFO()
-                    startupinfo.dwFlags |= subprocess.STARTF_USESHOWWINDOW
-                subprocess.Popen(cmd, cwd=self.config.minecraft_data_path, startupinfo=startupinfo)
+                # Linux/macOS: 使用 start_new_session 创建新会话
+                subprocess.Popen(
+                    cmd,
+                    cwd=self.config.minecraft_data_path,
+                    start_new_session=True,
+                    stdout=subprocess.DEVNULL,
+                    stderr=subprocess.DEVNULL,
+                    stdin=subprocess.DEVNULL
+                )
             
             print_success("游戏已启动")
+            print_info("提示：关闭启动器不会影响游戏运行")
             return True
         except Exception as e:
             logger.error(f"启动失败: {e}")
@@ -2912,6 +2927,7 @@ class MinecraftLauncher:
 • 数据包可以全局安装或安装到指定世界
 • 下载过程中可按 Ctrl+C 中断
 • 所有配置保存在 minecraft_launcher_config.json
+• 关闭启动器后游戏会继续运行，不会受影响
 
 {Colors.CYAN}数据路径{Colors.ENDC}
 默认数据路径: {Colors.GREEN}{self.config.minecraft_data_path}{Colors.ENDC}
